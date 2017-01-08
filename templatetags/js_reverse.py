@@ -13,7 +13,8 @@ from js_reverse.settings import *
 
 register = template.Library()
 
-def _reverse_all(urlpatterns, partial_name='', partial_pattern='', patterns={}):
+def _reverse_all(urlpatterns, partial_name='', partial_pattern='', patterns=None):
+    patterns = patterns if patterns is not None else {}
     for resolver in urlpatterns:
         if isinstance(resolver, RegexURLPattern) and resolver.name:
             patterns[partial_name + resolver.name] = mark_safe('/' + partial_pattern + resolver._regex[1:-1])
@@ -29,7 +30,7 @@ def _my_reverse(urlpatterns, path=[], i=0, partial_pattern=''):
         if i == len(path)-1:
             if path[i] == ALL_NAMES:
                 partial_name = ':'.join(path[:i])
-                if(partial_name):
+                if partial_name:
                     partial_name = partial_name + ':'
                 return _reverse_all(urlpatterns, partial_name, partial_pattern)
             elif isinstance(resolver, RegexURLPattern) and path[i] == resolver.name:
