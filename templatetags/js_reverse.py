@@ -13,7 +13,11 @@ from js_reverse.settings import *
 
 register = template.Library()
 
-def _reverse_all(urlpatterns, partial_name='', partial_pattern='', patterns={}):
+def _reverse_all(urlpatterns, partial_name=None, partial_pattern=None, patterns=None):
+    partial_name = partial_name if partial_name is not None else ''
+    partial_pattern = partial_pattern if partial_pattern is not None else ''
+    patterns = patterns if patterns is not None else {}
+    
     for resolver in urlpatterns:
         if isinstance(resolver, RegexURLPattern) and resolver.name:
             patterns[partial_name + resolver.name] = mark_safe('/' + partial_pattern + resolver._regex[1:-1])
@@ -24,12 +28,16 @@ def _reverse_all(urlpatterns, partial_name='', partial_pattern='', patterns={}):
                 _reverse_all(resolver.url_patterns, partial_name, partial_pattern + resolver._regex[1:], patterns)
     return patterns
 
-def _my_reverse(urlpatterns, path=[], i=0, partial_pattern=''):
+def _my_reverse(urlpatterns, path=None, i=None, partial_pattern=None):
+    path = path if path is not None else []
+    i = i if i is not None else 0
+    partial_pattern = partial_pattern if partial_pattern is not None else ''
+    
     for resolver in urlpatterns:
         if i == len(path)-1:
             if path[i] == ALL_NAMES:
                 partial_name = ':'.join(path[:i])
-                if(partial_name):
+                if partial_name:
                     partial_name = partial_name + ':'
                 return _reverse_all(urlpatterns, partial_name, partial_pattern)
             elif isinstance(resolver, RegexURLPattern) and path[i] == resolver.name:
