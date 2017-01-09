@@ -17,7 +17,6 @@ def _reverse_all(urlpatterns, partial_name=None, partial_pattern=None, patterns=
     partial_name = partial_name if partial_name is not None else ''
     partial_pattern = partial_pattern if partial_pattern is not None else ''
     patterns = patterns if patterns is not None else {}
-    
     for resolver in urlpatterns:
         if isinstance(resolver, RegexURLPattern) and resolver.name:
             patterns[partial_name + resolver.name] = mark_safe('/' + partial_pattern + resolver._regex[1:-1])
