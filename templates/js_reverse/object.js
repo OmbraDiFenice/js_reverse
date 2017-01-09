@@ -6,10 +6,15 @@
         DEBUG: false,
         
         reverse : function(name, args, kwargs) {
+            if(this.reverse.arguments.length >= 1 && typeof name !== "string") throw "first argument must be a string"
             switch(this.reverse.arguments.length) {
+            case 0: // no parameter specified
+                throw "you must specify the name of the view to reverse at least"
+                break;
             case 1: // just the name parameter
                 args = [];
                 kwargs = {};
+                break;
             case 2: // second parameter can be args or kwargs
                 if(typeof args !== 'object') throw "second parameter can be only an array (for positional arguments) or an object (for named arguments)"
                 if(typeof args === 'object' && !Array.isArray(args)) {
@@ -26,7 +31,7 @@
             var address = this.patterns[name];
             if(address === undefined) throw "URL name \"" + name + "\" not found";
             if(this.DEBUG) {
-                console.log("parsing raw address: " + address);
+                console.log("parsing view name " + name + "  raw address: " + address);
                 console.log(" ");
             }
             for (var param in kwargs){
@@ -48,7 +53,7 @@
                     
                 }
             }
-            if(address.indexOf("(?P<") >= 0) throw "Pattern \"" + this.patterns[name] + "\" contains uninitialized named parameters";
+            if(address.indexOf("(?P<") >= 0) throw "Pattern \"" + this.patterns[name] + "\" contains some uninitialized named parameters";
             
             for (var i = 0; i < args.length; i++) {
                 if(this.DEBUG) console.log("param: "+ i + "   args[" + i + "]: " + args[i]);
