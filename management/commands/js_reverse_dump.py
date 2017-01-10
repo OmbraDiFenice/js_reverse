@@ -57,6 +57,7 @@ class Command(BaseCommand):
                 self.write_file(options['output_file'], rendered_object, rendered_add_names)
             if options['create_static'] in self.static_choices_yes:
                 static_filename = os.path.join(os.path.dirname(getfile(App)), 'static', 'js_reverse', options['output_file'])
+                options['static_filename'] = static_filename
                 self.write_file(static_filename, rendered_object, rendered_add_names)
             
             self.print_response(**options)
@@ -76,9 +77,9 @@ class Command(BaseCommand):
         if options['create_static'] != 'only':
             self.stdout.write(self.style.SUCCESS('Reverse js script written into file \'%s\' in current directory' % options['output_file']))
             if options['create_static'] in self.static_choices_yes:
-                self.stdout.write(self.style.SUCCESS('A copy of this file has also been created in \'%s\'' % static_filename))
+                self.stdout.write(self.style.SUCCESS('A copy of this file has also been created in \'%s\'' % options['static_filename']))
         else:
-            self.stdout.write(self.style.SUCCESS('Reverse js script written into file \'%s\'' % static_filename))
+            self.stdout.write(self.style.SUCCESS('Reverse js script written into file \'%s\'' % options['static_filename']))
         
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('You can now move the generated file in your website or static directory and use it in your html with:'))
