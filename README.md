@@ -1,5 +1,5 @@
 # js_reverse
-A Django to use the reverse lookup on the client side via simple javascript function calls.
+A Django app to use the reverse lookup on the client side via simple javascript function calls.
 Below there is a quick reference. Refer to the wiki for the [full documentation](https://github.com/OmbraDiFenice/js_reverse/wiki).
 
 # [Requirements](https://github.com/OmbraDiFenice/js_reverse/wiki/Installation#requirements)
