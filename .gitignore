@@ -1,4 +1,2 @@
 __pycache__/
 *.pyc
-/templates/js_reverse/test.html
-/views.py

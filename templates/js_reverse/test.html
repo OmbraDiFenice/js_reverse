@@ -1,0 +1,67 @@
+{% load js_reverse %}
+<html>
+<head>
+    <title>test</title>
+    
+    <link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.1.1.css">
+    <script src="https://code.jquery.com/qunit/qunit-2.1.1.js"></script>
+    
+    {% js_reverse %}
+</head>
+<body>
+    <div id="qunit"></div>
+    
+    <script>
+        QUnit.test("Url object structure", function(assert) {
+            assert.ok(typeof Url === "object" && !Array.isArray(Url), "Url exists and it's an object");
+            assert.ok(Url.DEBUG === false, "debugging turned off by default");
+            assert.ok(typeof Url.reverse === "function", "Url has the reverse() function");
+            
+            var expected_pattern = {
+                'app1_view2': '/app1/view2/(?P<param1>.+)',
+                'app1:app1_view3': '/app1/view3',
+                
+                'app2:app2_view1': '/app2/view1/(?P<param1>.+)/(?P<param2>.+)',
+                'app2:app2_view2': '/app2/view2/(.+)/(.+)',
+                'app2:app2_view3': '/app2/view3/(.+)/(.+)/(?P<param1>.+)/(?P<param2>.+)',
+                
+                'app2:app3:app3_view1': '/app2/app3/(?P<param1>.+)/(?P<param2>.+)/view1/(?P<param3>.+)/(?P<param4>.+)',
+                'app2:app3:app3_view2': '/app2/app3/(?P<param1>.+)/(?P<param2>.+)/view2/(.+)/(.+)',
+                'app2:app3:app3_view3': '/app2/app3/(?P<param1>.+)/(?P<param2>.+)/view3/(?P<param3>.+)/(?P<param4>.+)/(.+)/(.+)',
+                
+                'test': '/'
+            };
+            assert.deepEqual(Url.patterns, expected_pattern, "Url has the correct pattern map");
+        });
+           
+        QUnit.test("Reversing", function(assert) {
+            assert.strictEqual(Url.reverse('test'), '/', "no parameter reverse");
+            
+            assert.throws(function(){Url.reverse('app1_view1')}, /URL name "app1_view1" not found/, "reversing not named view throws exception");
+            assert.strictEqual(Url.reverse('app1_view2', {param1: '01'}), "/app1/view2/01", "1 parameter reverse");
+            assert.strictEqual(Url.reverse('app1:app1_view3'), "/app1/view3", "no named parameter reverse with namespace");
+            
+            assert.strictEqual(Url.reverse('app2:app2_view1', {param1: 'p1', param2: 'p2'}), "/app2/view1/p1/p2", "2 named parameter reverse with namespace");
+            assert.strictEqual(Url.reverse('app2:app2_view2', [1,2]), "/app2/view2/1/2", "2 positional parameter reverse with namespace");
+            assert.strictEqual(Url.reverse('app2:app2_view3', [1,2], {param1: 'p1', param2: 'p2'}), "/app2/view3/1/2/p1/p2", "2 positional and 2 named parameter reverse with namespace");
+            
+            assert.strictEqual(Url.reverse('app2:app3:app3_view1', {param1: 'p1', param2: 'p2', param3: 3, param4: 4}), "/app2/app3/p1/p2/view1/3/4", "4 named parameter reverse with nested namespace");
+            assert.strictEqual(Url.reverse('app2:app3:app3_view2', ['a','b'], {param1: 'p1', param2: 'p2'}), "/app2/app3/p1/p2/view2/a/b", "2 positional and 2 named parameter reverse with nested namespace");
+            assert.strictEqual(Url.reverse('app2:app3:app3_view3', ['a','b'], {param1: 'p1', param2: 'p2', param3: 3, param4: 4}), "/app2/app3/p1/p2/view3/3/4/a/b", "2 positional and 4 named parameter reverse with nested namespace");
+        });
+        
+        QUnit.test("Parameter type checking", function(assert) {
+            assert.throws(function(){Url.reverse()}, /you must specify the name of the view to reverse at least/, "no arguments call");
+            assert.throws(function(){Url.reverse(3)}, /first argument must be a string/, "wrong view name type");
+            
+            assert.throws(function(){Url.reverse('app2:app2_view3', [1], {param1: 'p1', param2: 'p2'})}, /contains some uninitialized positional parameters/, "missing positional parameter");
+            assert.throws(function(){Url.reverse('app2:app2_view3', [1,2], {param1: 'p1'})}, /contains some uninitialized named parameters/, "missing named parameter");
+            
+            assert.throws(function(){Url.reverse('app2:app2_view2', {param1: 'p1', param2: 'p2'}, [1,2])}, /args must be an array/, "swapped type of arguments");
+            assert.throws(function(){Url.reverse('app2:app2_view3', [1,2], 3)}, /kwargs must be an object/, "wrong type for kwargs");
+            assert.throws(function(){Url.reverse('app2:app2_view2', 1, {param1: 'p1', param2: 'p2'})}, /args must be an array/, "wrong type for args");
+            assert.throws(function(){Url.reverse('app1:app1_view3', 'p1')}, /second parameter can be only an array \(for positional arguments\) or an object \(for named arguments\)/, "wrong type of second argument");
+        });
+    </script>
+</body>
+</html>
